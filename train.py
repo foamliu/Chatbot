@@ -1,7 +1,7 @@
-import json
 import random
 import time
 
+from torch import nn
 from torch import optim
 
 from data_gen import ChatbotDataset
@@ -51,7 +51,7 @@ def calc_loss(input_variable, lengths, target_variable, mask, max_target_len, en
             mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
             loss += mask_loss
 
-    return loss, mask_loss
+    return loss, mask_loss, nTotal
 
 
 def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer):
@@ -79,9 +79,10 @@ def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_opti
         print_losses = []
         n_totals = 0
 
-        loss, mask_loss = calc_loss(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder)
-        print_losses.append(mask_loss.item() * n_totals)
-        n_totals += n_totals
+        loss, mask_loss, nTotal = calc_loss(input_variable, lengths, target_variable, mask, max_target_len, encoder,
+                                            decoder)
+        print_losses.append(mask_loss.item() * nTotal)
+        n_totals += nTotal
 
         # Perform backpropatation
         loss.backward()
@@ -119,9 +120,12 @@ def main():
     val_loader = torch.utils.data.DataLoader(
         ChatbotDataset('valid'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
 
+    # Initialize word embeddings
+    embedding = nn.Embedding(voc.num_words, hidden_size)
+
     # Initialize encoder & decoder models
-    encoder = EncoderRNN(n_words, hidden_size, encoder_n_layers, dropout)
-    decoder = LuongAttnDecoderRNN(attn_model, hidden_size, n_words, decoder_n_layers, dropout)
+    encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
+    decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
 
     # Initialize optimizers
     print('Building optimizers ...')

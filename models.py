@@ -4,11 +4,11 @@ from torch import nn
 
 
 class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, n_layers=1, dropout=0):
+    def __init__(self, hidden_size, embedding, n_layers=1, dropout=0):
         super(EncoderRNN, self).__init__()
-        self.embedding = nn.Embedding(input_size, hidden_size)
         self.n_layers = n_layers
         self.hidden_size = hidden_size
+        self.embedding = embedding
 
         # Initialize GRU; the input_size and hidden_size params are both set to 'hidden_size'
         #   because our input size is a word embedding with number of features == hidden_size
@@ -72,7 +72,7 @@ class Attn(torch.nn.Module):
 
 
 class LuongAttnDecoderRNN(nn.Module):
-    def __init__(self, attn_model, hidden_size, output_size, n_layers=1, dropout=0.1):
+    def __init__(self, attn_model, embedding, hidden_size, output_size, n_layers=1, dropout=0.1):
         super(LuongAttnDecoderRNN, self).__init__()
 
         # Keep for reference
@@ -83,7 +83,7 @@ class LuongAttnDecoderRNN(nn.Module):
         self.dropout = dropout
 
         # Define layers
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
+        self.embedding = embedding
         self.embedding_dropout = nn.Dropout(dropout)
         self.gru = nn.GRU(hidden_size, hidden_size, n_layers, dropout=(0 if n_layers == 1 else dropout))
         self.concat = nn.Linear(hidden_size * 2, hidden_size)
