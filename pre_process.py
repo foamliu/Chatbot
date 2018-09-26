@@ -49,7 +49,7 @@ def build_samples():
 
     print('building samples')
     samples = []
-    for i in range(0, len(sentences), 2):
+    for i in tqdm(range(0, len(sentences) - 1, 2)):
         sentence_q = sentences[i]
         seg_list = jieba.cut(sentence_q)
         input_zh = encode_text(word_map, list(seg_list))
