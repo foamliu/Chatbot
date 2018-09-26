@@ -72,12 +72,13 @@ class ChatbotDataset(Dataset):
         else:
             self.samples = self.samples[num_training_samples:]
 
-        self.dataset_size = len(self.samples)
-
     def __getitem__(self, i):
-        sample = self.samples[i]
-        inp, lengths, output, mask, max_target_len = batch2TrainData([[sample['input'], sample['output']]])
-        return inp[0], lengths[0], output[0], mask[0], max_target_len[0]
+        pair_batch = []
+        for j in range(batch_size):
+            sample = self.samples[i * batch_size + j]
+            pair_batch.append((sample['input'], sample['output']))
+
+        return batch2TrainData(pair_batch)
 
     def __len__(self):
-        return self.dataset_size
+        return len(self.samples) // batch_size
