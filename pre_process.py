@@ -8,7 +8,7 @@ from config import *
 
 
 def encode_text(word_map, c):
-    return [word_map[word] for word in c] + [word_map['<end>']]
+    return [word_map.get(word, word_map['<unk>']) for word in c] + [word_map['<end>']]
 
 
 def build_wordmap():
@@ -26,10 +26,11 @@ def build_wordmap():
 
     # Create word map
     words = [w for w in word_freq.keys() if word_freq[w] > min_word_freq]
-    word_map = {k: v + 3 for v, k in enumerate(words)}
+    word_map = {k: v + 4 for v, k in enumerate(words)}
     word_map['<pad>'] = 0
     word_map['<start>'] = 1
     word_map['<end>'] = 2
+    word_map['<unk>'] = 3
     print(len(word_map))
     print(words[:10])
 
