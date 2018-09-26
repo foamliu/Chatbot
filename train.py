@@ -65,7 +65,8 @@ def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_opti
     start = time.time()
 
     # Batches
-    for i, (input_variable, lengths, target_variable, mask, max_target_len) in enumerate(train_loader):
+    for i in range(train_loader.__len__()):
+        input_variable, lengths, target_variable, mask, max_target_len = train_loader.__getitem__(i)
         # Zero gradients
         encoder_optimizer.zero_grad()
         decoder_optimizer.zero_grad()
@@ -115,8 +116,7 @@ def main():
     word_map = json.load(open('data/WORDMAP.json', 'r'))
     n_words = len(word_map)
 
-    train_loader = torch.utils.data.DataLoader(
-        ChatbotDataset('train'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
+    train_loader = ChatbotDataset('train')
     val_loader = torch.utils.data.DataLoader(
         ChatbotDataset('valid'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
 
