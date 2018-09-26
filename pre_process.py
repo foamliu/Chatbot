@@ -1,9 +1,14 @@
 import json
 from collections import Counter
-from tqdm import tqdm
+
 import jieba
+from tqdm import tqdm
 
 from config import *
+
+
+def encode_text(word_map, c):
+    return [word_map.get(word, word_map['<unk>']) for word in c] + [word_map['<end>']]
 
 
 def build_wordmap():
@@ -32,15 +37,28 @@ def build_wordmap():
 
 
 def build_samples():
+    word_map = json.load(open('data/WORDMAP.json', 'r'))
+
     with open(corpus_loc, 'r') as f:
         sentences = f.readlines()
 
-    sentences = [s[2:] for s in sentences if len(s[1:].strip()) > 0]
+    sentences = [s[2:].strip() for s in sentences if len(s[1:].strip()) > 0]
 
-    print(sentences[0])
-    print(sentences[1])
-    print(sentences[2])
-    print(sentences[3])
+    print('building samples')
+    samples = []
+    for i in range(0, len(sentences), 2):
+        sentence_q = sentences[i]
+        seg_list = jieba.cut(sentence_q)
+        input_zh = encode_text(word_map, list(seg_list))
+        sentence_a = sentences[i + 1]
+        seg_list = jieba.cut(sentence_a)
+        output_zh = encode_text(word_map, list(seg_list))
+        samples.append({'input': list(input_zh), 'output': list(output_zh)})
+
+    filename = 'data/samples.json'
+    with open(filename, 'w') as f:
+        json.dump(samples, f, indent=4)
+    print('{} samples created at: {}.'.format(len(samples), filename))
 
 
 if __name__ == '__main__':

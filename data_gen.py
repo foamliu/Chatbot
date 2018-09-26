@@ -10,13 +10,13 @@ class ChatbotDataset(Dataset):
         assert self.split in {'train', 'valid'}
 
         print('loading {} samples'.format(split))
+        samples_path = 'data/samples.json'
+        self.samples = json.load(open(samples_path, 'r'))
+
         if split == 'train':
-            samples_path = 'data/samples_train.json'
-            self.samples = json.load(open(samples_path, 'r'))
             self.samples = self.samples[:100000]
         else:
-            samples_path = 'data/samples_valid.json'
-            self.samples = json.load(open(samples_path, 'r'))
+            self.samples = self.samples[:100000]
 
         self.dataset_size = len(self.samples)
 
