@@ -1,8 +1,17 @@
-from utils import *
 import random
+from torch import optim
+from config import *
+from data_gen import ChatbotDataset
+from models import EncoderRNN, LuongAttnDecoderRNN
+from utils import *
 
-def train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder, embedding,
-          encoder_optimizer, decoder_optimizer, batch_size, clip, max_length=MAX_LENGTH):
+
+def train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder,
+          encoder_optimizer, decoder_optimizer):
+    # Ensure dropout layers are in train mode
+    encoder.train()
+    decoder.train()
+
     # Zero gradients
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
@@ -73,9 +82,21 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
     return sum(print_losses) / n_totals
 
 
-def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, decoder_optimizer, embedding,
-               encoder_n_layers, decoder_n_layers, save_dir, n_iteration, batch_size, print_every, save_every, clip,
-               corpus_name, loadFilename):
+def main():
+    train_loader = torch.utils.data.DataLoader(
+        ChatbotDataset('train'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
+    val_loader = torch.utils.data.DataLoader(
+        ChatbotDataset('valid'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
+
+    # Initialize encoder & decoder models
+    encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
+    decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
+
+    # Initialize optimizers
+    print('Building optimizers ...')
+    encoder_optimizer = optim.Adam(encoder.parameters(), lr=learning_rate)
+    decoder_optimizer = optim.Adam(decoder.parameters(), lr=learning_rate)
+
     # Load batches for each iteration
     training_batches = [batch2TrainData(voc, [random.choice(pairs) for _ in range(batch_size)])
                         for _ in range(n_iteration)]
@@ -96,7 +117,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
 
         # Run a training iteration with batch
         loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder,
-                     decoder, embedding, encoder_optimizer, decoder_optimizer, batch_size, clip)
+                     decoder, embedding, encoder_optimizer, decoder_optimizer)
         print_loss += loss
 
         # Print progress
@@ -123,3 +144,7 @@ def trainIters(model_name, voc, pairs, encoder, decoder, encoder_optimizer, deco
                 'voc_dict': voc.__dict__,
                 'embedding': embedding.state_dict()
             }, os.path.join(directory, '{}_{}.tar'.format(iteration, 'checkpoint')))
+
+
+if __name__ == '__main__':
+    main()

@@ -14,6 +14,6 @@ def extract(folder):
 if __name__ == '__main__':
     ensure_folder('data')
 
-    if not os.path.isdir(train_folder):
-        extract(train_folder)
+    if not os.path.isdir(corpus_loc):
+        extract(corpus_loc)
 
