@@ -29,8 +29,7 @@ def binaryMatrix(l, value=PAD_token):
 
 
 # Returns padded input sequence tensor and lengths
-def inputVar(l, voc):
-    indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
+def inputVar(indexes_batch):
     lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
     padVar = torch.LongTensor(padList)
@@ -38,8 +37,7 @@ def inputVar(l, voc):
 
 
 # Returns padded target sequence tensor, padding mask, and max target length
-def outputVar(l, voc):
-    indexes_batch = [indexesFromSentence(voc, sentence) for sentence in l]
+def outputVar(indexes_batch):
     max_target_len = max([len(indexes) for indexes in indexes_batch])
     padList = zeroPadding(indexes_batch)
     mask = binaryMatrix(padList)
@@ -49,14 +47,14 @@ def outputVar(l, voc):
 
 
 # Returns all items for a given batch of pairs
-def batch2TrainData(voc, pair_batch):
-    pair_batch.sort(key=lambda x: len(x[0].split(" ")), reverse=True)
+def batch2TrainData(pair_batch):
+    pair_batch.sort(key=lambda x: len(x[0]), reverse=True)
     input_batch, output_batch = [], []
     for pair in pair_batch:
         input_batch.append(pair[0])
         output_batch.append(pair[1])
-    inp, lengths = inputVar(input_batch, voc)
-    output, mask, max_target_len = outputVar(output_batch, voc)
+    inp, lengths = inputVar(input_batch)
+    output, mask, max_target_len = outputVar(output_batch)
     return inp, lengths, output, mask, max_target_len
 
 
@@ -78,7 +76,7 @@ class ChatbotDataset(Dataset):
 
     def __getitem__(self, i):
         sample = self.samples[i]
-        inp, lengths, output, mask, max_target_len = batch2TrainData(voc, [[sample['input'], sample['output']]])
+        inp, lengths, output, mask, max_target_len = batch2TrainData([[sample['input'], sample['output']]])
         return inp[0], lengths[0], output[0], mask[0], max_target_len[0]
 
     def __len__(self):
