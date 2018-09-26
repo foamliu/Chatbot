@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     # Example for validation
     small_batch_size = 5
-    batches = batch2TrainData(voc, pair_batch)
+    batches = batch2TrainData(pair_batch)
     input_variable, lengths, target_variable, mask, max_target_len = batches
 
     print("input_variable:", input_variable)
