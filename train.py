@@ -127,6 +127,10 @@ def main():
     encoder = EncoderRNN(hidden_size, embedding, encoder_n_layers, dropout)
     decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, decoder_n_layers, dropout)
 
+    # Use appropriate device
+    encoder = encoder.to(device)
+    decoder = decoder.to(device)
+
     # Initialize optimizers
     print('Building optimizers ...')
     encoder_optimizer = optim.Adam(encoder.parameters(), lr=learning_rate)
