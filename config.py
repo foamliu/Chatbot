@@ -47,7 +47,7 @@ class Voc:
         word_map = json.load(open(filename, 'r'))
         self.word2index = word_map
         self.index2word = {v: k for k, v in word_map.items()}
-        self.n_words = len(word_map)
+        self.num_words = len(word_map)
 
 
 voc = Voc('data/WORDMAP.json')
