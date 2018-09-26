@@ -17,7 +17,7 @@ def zeroPadding(l, fillvalue=PAD_token):
     return list(itertools.zip_longest(*l, fillvalue=fillvalue))
 
 
-def binaryMatrix(l, value=PAD_token):
+def binaryMatrix(l):
     m = []
     for i, seq in enumerate(l):
         m.append([])
