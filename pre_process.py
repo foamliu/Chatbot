@@ -8,7 +8,7 @@ from config import *
 
 
 def encode_text(word_map, c):
-    return [word_map.get(word, word_map['<unk>']) for word in c] + [word_map['<end>']]
+    return [word_map[word] for word in c] + [word_map['<end>']]
 
 
 def build_wordmap():
