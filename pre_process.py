@@ -27,9 +27,9 @@ def build_wordmap():
     # Create word map
     words = [w for w in word_freq.keys() if word_freq[w] > min_word_freq]
     word_map = {k: v + 3 for v, k in enumerate(words)}
-    word_map['<start>'] = 0
-    word_map['<end>'] = 1
-    word_map['<unk>'] = 2
+    word_map['<pad>'] = 0
+    word_map['<start>'] = 1
+    word_map['<end>'] = 2
     print(len(word_map))
     print(words[:10])
 

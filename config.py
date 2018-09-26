@@ -1,3 +1,5 @@
+import json
+
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -14,7 +16,7 @@ print_every = 1
 save_every = 500
 workers = 1
 max_len = 10  # Maximum sentence length to consider
-min_word_freq = 3    # Minimum word count threshold for trimming
+min_word_freq = 3  # Minimum word count threshold for trimming
 
 # Configure models
 model_name = 'cb_model'
@@ -39,3 +41,13 @@ PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
 EOS_token = 2  # End-of-sentence token
 
+
+class Voc:
+    def __init__(self, filename):
+        word_map = json.load(open(filename, 'r'))
+        self.word2index = word_map
+        self.index2word = {v: k for k, v in word_map.items()}
+        self.n_words = len(word_map)
+
+
+voc = Voc('data/WORDMAP.json')
