@@ -1,1 +1,3 @@
 .idea
+__pycache__/
+data/xiaohuangji50w_nofenci.conv
