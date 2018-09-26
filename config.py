@@ -19,8 +19,8 @@ min_word_freq = 3    # Minimum word count threshold for trimming
 # Configure models
 model_name = 'cb_model'
 attn_model = 'dot'
-#attn_model = 'general'
-#attn_model = 'concat'
+start_epoch = 0
+epochs = 120
 hidden_size = 500
 encoder_n_layers = 2
 decoder_n_layers = 2
