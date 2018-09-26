@@ -3,6 +3,8 @@ import json
 
 from torch.utils.data import Dataset
 
+from config import *
+
 
 class ChatbotDataset(Dataset):
     def __init__(self, split):
@@ -14,9 +16,9 @@ class ChatbotDataset(Dataset):
         self.samples = json.load(open(samples_path, 'r'))
 
         if split == 'train':
-            self.samples = self.samples[:100000]
+            self.samples = self.samples[:num_training_samples]
         else:
-            self.samples = self.samples[:100000]
+            self.samples = self.samples[num_training_samples:]
 
         self.dataset_size = len(self.samples)
 

@@ -31,6 +31,9 @@ batch_size = 64
 loadFilename = None
 checkpoint_iter = 4000
 
+num_samples = 454621
+num_training_samples = 450000
+
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
