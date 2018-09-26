@@ -87,3 +87,24 @@ class ChatbotDataset(Dataset):
 
     def __len__(self):
         return int(np.ceil(len(self.samples) / float(batch_size)))
+
+
+if __name__ == '__main__':
+    print('loading {} samples'.format('valid'))
+    samples_path = 'data/samples.json'
+    samples = json.load(open(samples_path, 'r'))
+    pair_batch = []
+    for i in range(5):
+        sample = samples[i]
+        pair_batch.append((sample['input'], sample['output']))
+
+    # Example for validation
+    small_batch_size = 5
+    batches = batch2TrainData(voc, pair_batch)
+    input_variable, lengths, target_variable, mask, max_target_len = batches
+
+    print("input_variable:", input_variable)
+    print("lengths:", lengths)
+    print("target_variable:", target_variable)
+    print("mask:", mask)
+    print("max_target_len:", max_target_len)
