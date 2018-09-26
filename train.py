@@ -64,6 +64,9 @@ def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_opti
 
     start = time.time()
 
+    print_losses = []
+    n_totals = 0
+
     # Batches
     for i in range(train_loader.__len__()):
         input_variable, lengths, target_variable, mask, max_target_len = train_loader.__getitem__(i)
@@ -76,9 +79,6 @@ def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_opti
         lengths = lengths.to(device)
         target_variable = target_variable.to(device)
         mask = mask.to(device)
-
-        print_losses = []
-        n_totals = 0
 
         loss, mask_loss, nTotal = calc_loss(input_variable, lengths, target_variable, mask, max_target_len, encoder,
                                             decoder)
