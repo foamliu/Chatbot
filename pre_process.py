@@ -1,6 +1,6 @@
 import json
 from collections import Counter
-
+from tqdm import tqdm
 import jieba
 
 from config import *
@@ -14,7 +14,7 @@ def build_wordmap():
 
     word_freq = Counter()
 
-    for sentence in sentences:
+    for sentence in tqdm(sentences):
         seg_list = jieba.cut(sentence)
         # Update word frequency
         word_freq.update(list(seg_list))
