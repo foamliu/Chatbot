@@ -119,14 +119,14 @@ def validate(val_loader, encoder, decoder):
     # Initialize search module
     searcher = GreedySearchDecoder(encoder, decoder)
 
-    # Batches
-    for i, (input_array, target_array) in enumerate(val_loader):
+    input_variable, lengths, target_variable, mask, max_target_len = val_loader.__getitem__(0)
+    for i in range(10):
         # Normalize sentence
-        input_sentence = ' '.join([voc.index2word[idx.item()] for idx in input_array])
+        input_sentence = ' '.join([voc.index2word[idx.item()] for idx in input_variable[i]])
         print(input_sentence)
 
         # Evaluate sentence
-        output_words = evaluate([input_array], searcher, voc, input_sentence)
+        output_words = evaluate([input_variable[i]], searcher, voc, input_sentence)
         # Format and print response sentence
         output_words[:] = [x for x in output_words if not (x == '<end>' or x == '<pad>')]
         output_sentence = ''.join(output_words)
