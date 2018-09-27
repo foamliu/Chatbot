@@ -136,12 +136,8 @@ def validate(val_loader, encoder, decoder):
 
 
 def main():
-    word_map = json.load(open('data/WORDMAP.json', 'r'))
-    n_words = len(word_map)
-
     train_loader = ChatbotDataset('train')
-    val_loader = torch.utils.data.DataLoader(
-        ChatbotDataset('valid'), batch_size=batch_size, shuffle=True, num_workers=workers, pin_memory=True)
+    val_loader = ChatbotDataset('valid')
 
     # Initialize word embeddings
     embedding = nn.Embedding(voc.num_words, hidden_size)
