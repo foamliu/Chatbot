@@ -3,7 +3,6 @@
 import itertools
 
 import jieba
-import numpy as np
 from torch.utils.data import Dataset
 
 from config import *
@@ -75,18 +74,17 @@ class ChatbotDataset(Dataset):
 
     def __getitem__(self, idx):
         i = idx * batch_size
-        length = min(batch_size, (len(self.samples) - i))
 
         pair_batch = []
 
-        for i_batch in range(length):
+        for i_batch in range(batch_size):
             sample = self.samples[i + i_batch]
             pair_batch.append((sample['input'], sample['output']))
 
         return batch2TrainData(pair_batch)
 
     def __len__(self):
-        return int(np.ceil(len(self.samples) / float(batch_size)))
+        return len(self.samples) // batch_size
 
 
 if __name__ == '__main__':
