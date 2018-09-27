@@ -74,10 +74,11 @@ class ChatbotDataset(Dataset):
 
     def __getitem__(self, idx):
         i = idx * batch_size
+        length = min(batch_size, (len(self.samples) - i))
 
         pair_batch = []
 
-        for i_batch in range(batch_size):
+        for i_batch in range(length):
             sample = self.samples[i + i_batch]
             pair_batch.append((sample['input'], sample['output']))
 
