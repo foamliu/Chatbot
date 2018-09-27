@@ -120,7 +120,7 @@ def validate(val_loader, encoder, decoder):
     searcher = GreedySearchDecoder(encoder, decoder)
 
     # Batches
-    for i, (input_array, target_array) in enumerate(val_loader[:10]):
+    for i, (input_array, target_array) in enumerate(val_loader):
         # Normalize sentence
         input_sentence = ' '.join([voc.index2word[idx.item()] for idx in input_array])
         print(input_sentence)
@@ -131,6 +131,8 @@ def validate(val_loader, encoder, decoder):
         output_words[:] = [x for x in output_words if not (x == '<end>' or x == '<pad>')]
         output_sentence = ''.join(output_words)
         print(output_sentence)
+        if i >= 10:
+            break
 
 
 def main():
