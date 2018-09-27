@@ -1,7 +1,6 @@
 import random
 import time
 
-from torch import nn
 from torch import optim
 
 from data_gen import ChatbotDataset
@@ -112,6 +111,28 @@ def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_opti
     return sum(print_losses) / n_totals
 
 
+def validate(val_loader, encoder, decoder):
+    # Set dropout layers to eval mode
+    encoder.eval()
+    decoder.eval()
+
+    # Initialize search module
+    searcher = GreedySearchDecoder(encoder, decoder)
+
+    # Batches
+    for i, (input_array, target_array) in enumerate(val_loader[:10]):
+        # Normalize sentence
+        input_sentence = ' '.join([voc.index2word[idx.item()] for idx in input_array])
+        print(input_sentence)
+
+        # Evaluate sentence
+        output_words = evaluate([input_array], searcher, voc, input_sentence)
+        # Format and print response sentence
+        output_words[:] = [x for x in output_words if not (x == '<end>' or x == '<pad>')]
+        output_sentence = ''.join(output_words)
+        print(output_sentence)
+
+
 def main():
     word_map = json.load(open('data/WORDMAP.json', 'r'))
     n_words = len(word_map)
@@ -145,6 +166,8 @@ def main():
         # Run a training iteration with batch
         loss = train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer)
         plot_losses.append(loss)
+
+        validate(val_loader, encoder, decoder)
 
 
 if __name__ == '__main__':
