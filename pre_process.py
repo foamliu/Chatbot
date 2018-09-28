@@ -42,10 +42,11 @@ def build_samples():
 
     with open(corpus_loc, 'r') as f:
         sentences = f.readlines()
-    print(len(sentences))
+    print('total lines: ' + str(len(sentences)))
 
     sentences = [s[2:].strip() for s in sentences if len(s[1:].strip()) > 0]
     print(len(sentences))
+    print('removed empty lines: ' + str(len(sentences)))
 
     print('building samples')
     samples = []
