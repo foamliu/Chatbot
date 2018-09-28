@@ -34,8 +34,8 @@ batch_size = 64
 loadFilename = None
 checkpoint_iter = 4000
 
-num_samples = 454621
-num_training_samples = 450000
+num_samples = 346938
+num_training_samples = 340000
 
 # Default word tokens
 PAD_token = 0  # Used for padding short sentences
