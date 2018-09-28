@@ -1,4 +1,3 @@
-import random
 import time
 
 from torch import optim
@@ -8,9 +7,22 @@ from models import EncoderRNN, LuongAttnDecoderRNN
 from utils import *
 
 
-def calc_loss(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder):
+def train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder, encoder_optimizer,
+          decoder_optimizer):
+    # Zero gradients
+    encoder_optimizer.zero_grad()
+    decoder_optimizer.zero_grad()
+
+    # Set device options
+    input_variable = input_variable.to(device)
+    lengths = lengths.to(device)
+    target_variable = target_variable.to(device)
+    mask = mask.to(device)
+
     # Initialize variables
     loss = 0
+    print_losses = []
+    n_totals = 0
 
     # Forward pass through encoder
     encoder_outputs, encoder_hidden = encoder(input_variable, lengths)
@@ -36,7 +48,8 @@ def calc_loss(input_variable, lengths, target_variable, mask, max_target_len, en
             # Calculate and accumulate loss
             mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
             loss += mask_loss
-
+            print_losses.append(mask_loss.item() * nTotal)
+            n_totals += nTotal
     else:
         for t in range(max_target_len):
             decoder_output, decoder_hidden = decoder(
@@ -49,90 +62,39 @@ def calc_loss(input_variable, lengths, target_variable, mask, max_target_len, en
             # Calculate and accumulate loss
             mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
             loss += mask_loss
+            print_losses.append(mask_loss.item() * nTotal)
+            n_totals += nTotal
 
-    return loss, mask_loss, nTotal
+    # Perform backpropatation
+    loss.backward()
 
+    # Clip gradients: gradients are modified in place
+    _ = torch.nn.utils.clip_grad_norm_(encoder.parameters(), clip)
+    _ = torch.nn.utils.clip_grad_norm_(decoder.parameters(), clip)
 
-def train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer):
-    # Ensure dropout layers are in train mode
-    encoder.train()
-    decoder.train()
-
-    batch_time = AverageMeter()  # forward prop. + back prop. time
-    losses = AverageMeter()  # loss (per word decoded)
-
-    start = time.time()
-
-    print_losses = []
-    n_totals = 0
-
-    # Batches
-    for i in range(train_loader.__len__()):
-        input_variable, lengths, target_variable, mask, max_target_len = train_loader.__getitem__(i)
-        # Zero gradients
-        encoder_optimizer.zero_grad()
-        decoder_optimizer.zero_grad()
-
-        # Set device options
-        input_variable = input_variable.to(device)
-        lengths = lengths.to(device)
-        target_variable = target_variable.to(device)
-        mask = mask.to(device)
-
-        loss, mask_loss, nTotal = calc_loss(input_variable, lengths, target_variable, mask, max_target_len, encoder,
-                                            decoder)
-        print_losses.append(mask_loss.item() * nTotal)
-        n_totals += nTotal
-
-        # Perform backpropatation
-        loss.backward()
-
-        # Clip gradients: gradients are modified in place
-        _ = torch.nn.utils.clip_grad_norm_(encoder.parameters(), clip)
-        _ = torch.nn.utils.clip_grad_norm_(decoder.parameters(), clip)
-
-        # Adjust model weights
-        encoder_optimizer.step()
-        decoder_optimizer.step()
-
-        # Keep track of metrics
-        losses.update(loss.item(), max_target_len)
-        batch_time.update(time.time() - start)
-
-        start = time.time()
-
-        if i % print_every == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
-                  'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(train_loader),
-                                                                  batch_time=batch_time,
-                                                                  loss=losses))
+    # Adjust model weights
+    encoder_optimizer.step()
+    decoder_optimizer.step()
 
     return sum(print_losses) / n_totals
 
 
-def validate(val_loader, encoder, decoder):
-    # Set dropout layers to eval mode
-    encoder.eval()
-    decoder.eval()
-
-    # Initialize search module
-    searcher = GreedySearchDecoder(encoder, decoder)
-
-    input_variable, lengths, target_variable, mask, max_target_len = val_loader.__getitem__(0)
-    for i in range(10):
-        # Normalize sentence
-        input_sentence = ' '.join([voc.index2word[idx.item()] for idx in input_variable[i]])
-        print(input_sentence)
-
-        # Evaluate sentence
-        output_words = evaluate([input_variable[i]], searcher, voc, input_sentence)
-        # Format and print response sentence
-        output_words[:] = [x for x in output_words if not (x == '<end>' or x == '<pad>')]
-        output_sentence = ''.join(output_words)
-        print(output_sentence)
-        if i >= 10:
-            break
+def evaluate(searcher, sentence, max_length=max_len):
+    ### Format input sentence as a batch
+    # words -> indexes
+    indexes_batch = [indexesFromSentence(voc, sentence)]
+    # Create lengths tensor
+    lengths = torch.tensor([len(indexes) for indexes in indexes_batch])
+    # Transpose dimensions of batch to match models' expectations
+    input_batch = torch.LongTensor(indexes_batch).transpose(0, 1)
+    # Use appropriate device
+    input_batch = input_batch.to(device)
+    lengths = lengths.to(device)
+    # Decode sentence with searcher
+    tokens, scores = searcher(input_batch, lengths, max_length)
+    # indexes -> words
+    decoded_words = [voc.index2word[token.item()] for token in tokens]
+    return decoded_words
 
 
 def main():
@@ -157,15 +119,58 @@ def main():
 
     # Initializations
     print('Initializing ...')
-    plot_losses = []
+    batch_time = AverageMeter()  # forward prop. + back prop. time
+    losses = AverageMeter()  # loss (per word decoded)
 
     # Epochs
     for epoch in range(start_epoch, epochs):
-        # Run a training iteration with batch
-        loss = train(epoch, train_loader, encoder, decoder, encoder_optimizer, decoder_optimizer)
-        plot_losses.append(loss)
+        # One epoch's training
+        # Ensure dropout layers are in train mode
+        encoder.train()
+        decoder.train()
 
-        validate(val_loader, encoder, decoder)
+        start = time.time()
+
+        # Batches
+        for i in range(train_loader.__len__()):
+            input_variable, lengths, target_variable, mask, max_target_len = train_loader.__getitem__(i)
+            loss = train(input_variable, lengths, target_variable, mask, max_target_len, encoder, decoder,
+                         encoder_optimizer, decoder_optimizer)
+
+            # Keep track of metrics
+            losses.update(loss, max_target_len)
+            batch_time.update(time.time() - start)
+
+            start = time.time()
+
+            if i % print_every == 0:
+                print('Epoch: [{0}][{1}/{2}]\t'
+                      'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(train_loader),
+                                                                      batch_time=batch_time,
+                                                                      loss=losses))
+
+        # Initialize search module
+        searcher = GreedySearchDecoder(encoder, decoder)
+        for sentence in pick_n_valid_sentences(10):
+            decoded_words = evaluate(searcher, sentence)
+            print(sentence)
+            print(decoded_words)
+
+        # Save checkpoint
+        if epoch % save_every == 0:
+            directory = os.path.join(save_dir, '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size))
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            torch.save({
+                'epoch': epoch,
+                'en': encoder.state_dict(),
+                'de': decoder.state_dict(),
+                'en_opt': encoder_optimizer.state_dict(),
+                'de_opt': decoder_optimizer.state_dict(),
+                'loss': loss,
+                'voc': voc.__dict__
+            }, os.path.join(directory, '{}_{}.tar'.format(epoch, 'checkpoint')))
 
 
 if __name__ == '__main__':

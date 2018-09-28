@@ -1,7 +1,9 @@
 import os
+import random
 import re
 import unicodedata
 
+import jieba
 from torch import nn
 
 from config import *
@@ -105,21 +107,13 @@ def normalizeString(s):
     return s
 
 
-def evaluateInput(encoder, decoder, searcher, voc):
-    input_sentence = ''
-    while (1):
-        try:
-            # Get input sentence
-            input_sentence = input('> ')
-            # Check if it is quit case
-            if input_sentence == 'q' or input_sentence == 'quit': break
-            # Normalize sentence
-            input_sentence = normalizeString(input_sentence)
-            # Evaluate sentence
-            output_words = evaluate(encoder, decoder, searcher, voc, input_sentence)
-            # Format and print response sentence
-            output_words[:] = [x for x in output_words if not (x == '<end>' or x == '<pad>')]
-            print('Bot:', ' '.join(output_words))
+def indexesFromSentence(voc, sentence):
+    return [voc.word2index[word] for word in jieba.cut(sentence)] + [EOS_token]
 
-        except KeyError:
-            print("Error: Encountered unknown word.")
+
+def pick_n_valid_sentences(n):
+    samples_path = 'data/samples.json'
+    samples = json.load(open(samples_path, 'r'))
+    samples = samples[num_training_samples:]
+    samples = random.sample(samples, n)
+    return [' '.join([voc.index2word[token] for token in sample['input'] if token != EOS_token]) for sample in samples]
