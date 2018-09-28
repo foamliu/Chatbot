@@ -1,4 +1,3 @@
-import json
 from collections import Counter
 
 import jieba
@@ -51,14 +50,14 @@ def build_samples():
     print('building samples')
     samples = []
     for i in tqdm(range(0, len(sentences) - 1, 2)):
-        sentence_q = sentences[i]
-        seg_list = jieba.cut(sentence_q)
-        input_zh = encode_text(word_map, list(seg_list))
-        sentence_a = sentences[i + 1]
-        seg_list = jieba.cut(sentence_a)
-        output_zh = encode_text(word_map, list(seg_list))
-        if len(input_zh) <= max_len and len(output_zh) <= max_len:
-            samples.append({'input': list(input_zh), 'output': list(output_zh)})
+        sentence_in = sentences[i]
+        seg_list = jieba.cut(sentence_in)
+        tokens_in = encode_text(word_map, list(seg_list))
+        sentence_out = sentences[i + 1]
+        seg_list = jieba.cut(sentence_out)
+        tokens_out = encode_text(word_map, list(seg_list))
+        if len(tokens_in) <= max_len and len(tokens_out) <= max_len:
+            samples.append({'input': list(tokens_in), 'output': list(tokens_out)})
 
     filename = 'data/samples.json'
     with open(filename, 'w') as f:
