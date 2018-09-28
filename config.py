@@ -41,6 +41,7 @@ num_training_samples = 340000
 PAD_token = 0  # Used for padding short sentences
 SOS_token = 1  # Start-of-sentence token
 EOS_token = 2  # End-of-sentence token
+UNK_token = 3
 
 
 class Voc:

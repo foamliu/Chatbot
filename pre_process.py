@@ -56,7 +56,7 @@ def build_samples():
         sentence_out = sentences[i + 1]
         seg_list = jieba.cut(sentence_out)
         tokens_out = encode_text(word_map, list(seg_list))
-        if len(tokens_in) <= max_len and len(tokens_out) <= max_len:
+        if len(tokens_in) <= max_len and len(tokens_out) <= max_len and UNK_token not in (tokens_in + tokens_out):
             samples.append({'input': list(tokens_in), 'output': list(tokens_out)})
 
     filename = 'data/samples.json'
