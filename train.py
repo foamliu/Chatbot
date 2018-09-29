@@ -79,7 +79,7 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
     return sum(print_losses) / n_totals
 
 
-def validate(val_loader, epoch, encoder, decoder):
+def validate(val_loader, encoder, decoder):
     with torch.no_grad():
         # eval mode (no dropout or batchnorm)
         encoder.eval()
@@ -139,9 +139,9 @@ def validate(val_loader, epoch, encoder, decoder):
             start = time.time()
 
             if i_batch % print_every == 0:
-                print('Epoch: [{0}][{1}/{2}]\t'
+                print('Validation: [{0}/{1}]\t'
                       'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i_batch, len(val_loader),
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(i_batch, len(val_loader),
                                                                       batch_time=batch_time,
                                                                       loss=losses))
 
@@ -218,7 +218,7 @@ def main():
                                                                       batch_time=batch_time,
                                                                       loss=losses))
         # One epoch's validation
-        validate(val_loader, epoch, encoder, decoder)
+        validate(val_loader, encoder, decoder)
 
         # Initialize search module
         searcher = GreedySearchDecoder(encoder, decoder)
