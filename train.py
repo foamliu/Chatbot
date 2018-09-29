@@ -79,6 +79,73 @@ def train(input_variable, lengths, target_variable, mask, max_target_len, encode
     return sum(print_losses) / n_totals
 
 
+def validate(val_loader, epoch, encoder, decoder):
+    with torch.no_grad():
+        # eval mode (no dropout or batchnorm)
+        encoder.eval()
+        decoder.eval()
+
+        batch_time = AverageMeter()
+        losses = AverageMeter()
+
+        start = time.time()
+
+        references = list()  # references (true captions) for calculating BLEU-4 score
+        hypotheses = list()  # hypotheses (predictions)
+
+        # Batches
+        for i in range(val_loader.__len__()):
+            input_variable, lengths, target_variable, mask, max_target_len = val_loader.__getitem__(i)
+            # Set device options
+            input_variable = input_variable.to(device)
+            lengths = lengths.to(device)
+            target_variable = target_variable.to(device)
+            mask = mask.to(device)
+
+            # Initialize variables
+            loss = 0
+            print_losses = []
+            n_totals = 0
+
+            # Forward pass through encoder
+            encoder_outputs, encoder_hidden = encoder(input_variable, lengths)
+
+            # Create initial decoder input (start with SOS tokens for each sentence)
+            decoder_input = torch.LongTensor([[SOS_token for _ in range(batch_size)]])
+            decoder_input = decoder_input.to(device)
+
+            # Set initial decoder hidden state to the encoder's final hidden state
+            decoder_hidden = encoder_hidden[:decoder.n_layers]
+
+            for t in range(max_target_len):
+                decoder_output, decoder_hidden = decoder(
+                    decoder_input, decoder_hidden, encoder_outputs
+                )
+                # No teacher forcing: next input is decoder's own current output
+                _, topi = decoder_output.topk(1)
+                decoder_input = torch.LongTensor([[topi[i][0] for i in range(batch_size)]])
+                decoder_input = decoder_input.to(device)
+                # Calculate and accumulate loss
+                mask_loss, nTotal = maskNLLLoss(decoder_output, target_variable[t], mask[t])
+                loss += mask_loss
+                print_losses.append(mask_loss.item() * nTotal)
+                n_totals += nTotal
+
+            loss = sum(print_losses) / n_totals
+            # Keep track of metrics
+            losses.update(loss, max_target_len)
+            batch_time.update(time.time() - start)
+
+            start = time.time()
+
+            if i % print_every == 0:
+                print('Epoch: [{0}][{1}/{2}]\t'
+                      'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(val_loader),
+                                                                      batch_time=batch_time,
+                                                                      loss=losses))
+
+
 def evaluate(searcher, sentence, max_length=max_len):
     ### Format input sentence as a batch
     # words -> indexes
@@ -150,6 +217,8 @@ def main():
                       'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(train_loader),
                                                                       batch_time=batch_time,
                                                                       loss=losses))
+        # One epoch's validation
+        validate(val_loader, epoch, encoder, decoder)
 
         # Initialize search module
         searcher = GreedySearchDecoder(encoder, decoder)
