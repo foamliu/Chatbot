@@ -138,10 +138,10 @@ def validate(val_loader, epoch, encoder, decoder):
 
             start = time.time()
 
-            if i % print_every == 0:
+            if i_batch % print_every == 0:
                 print('Epoch: [{0}][{1}/{2}]\t'
                       'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i, len(val_loader),
+                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(epoch, i_batch, len(val_loader),
                                                                       batch_time=batch_time,
                                                                       loss=losses))
 
