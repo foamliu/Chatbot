@@ -85,6 +85,8 @@ def validate(val_loader, encoder, decoder):
 
         batch_time = AverageMeter()
         losses = AverageMeter()
+        print_losses = []
+        n_totals = 0
 
         start = time.time()
 
@@ -102,8 +104,6 @@ def validate(val_loader, encoder, decoder):
 
             # Initialize variables
             loss = 0
-            print_losses = []
-            n_totals = 0
 
             # Forward pass through encoder
             encoder_outputs, encoder_hidden = encoder(input_variable, lengths)
@@ -136,13 +136,7 @@ def validate(val_loader, encoder, decoder):
 
             start = time.time()
 
-            if i_batch % print_every == 0:
-                print('Validation: [{0}/{1}]\t'
-                      'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(i_batch, len(val_loader),
-                                                                      batch_time=batch_time,
-                                                                      loss=losses))
-    return losses.val
+    return sum(print_losses) / n_totals
 
 
 def evaluate(searcher, sentence, max_length=max_len):
@@ -218,6 +212,7 @@ def main():
                                                                       loss=losses))
         # One epoch's validation
         val_loss = validate(val_loader, encoder, decoder)
+        print('\n * LOSS - {loss:.3f}\n'.format(loss=val_loss))
 
         # Initialize search module
         searcher = GreedySearchDecoder(encoder, decoder)
@@ -239,7 +234,7 @@ def main():
                 'de_opt': decoder_optimizer.state_dict(),
                 'loss': loss,
                 'voc': voc.__dict__
-            }, os.path.join(directory, '{}_{}.tar'.format('checkpoint', epoch)))
+            }, os.path.join(directory, '{}_{}_{}.tar'.format('checkpoint', epoch, val_loss)))
 
 
 if __name__ == '__main__':
