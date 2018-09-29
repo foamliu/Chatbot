@@ -94,8 +94,8 @@ def validate(val_loader, epoch, encoder, decoder):
         hypotheses = list()  # hypotheses (predictions)
 
         # Batches
-        for i in range(val_loader.__len__()):
-            input_variable, lengths, target_variable, mask, max_target_len = val_loader.__getitem__(i)
+        for i_batch in range(val_loader.__len__()):
+            input_variable, lengths, target_variable, mask, max_target_len = val_loader.__getitem__(i_batch)
             # Set device options
             input_variable = input_variable.to(device)
             lengths = lengths.to(device)
