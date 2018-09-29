@@ -142,6 +142,7 @@ def validate(val_loader, encoder, decoder):
                       'Loss {loss.val:.4f} ({loss.avg:.4f})\t'.format(i_batch, len(val_loader),
                                                                       batch_time=batch_time,
                                                                       loss=losses))
+    return losses.val
 
 
 def evaluate(searcher, sentence, max_length=max_len):
@@ -216,7 +217,7 @@ def main():
                                                                       batch_time=batch_time,
                                                                       loss=losses))
         # One epoch's validation
-        validate(val_loader, encoder, decoder)
+        val_loss = validate(val_loader, encoder, decoder)
 
         # Initialize search module
         searcher = GreedySearchDecoder(encoder, decoder)
@@ -227,7 +228,7 @@ def main():
 
         # Save checkpoint
         if epoch % save_every == 0:
-            directory = os.path.join(save_dir, '{}-{}_{}'.format(encoder_n_layers, decoder_n_layers, hidden_size))
+            directory = save_dir
             if not os.path.exists(directory):
                 os.makedirs(directory)
             torch.save({
@@ -238,7 +239,7 @@ def main():
                 'de_opt': decoder_optimizer.state_dict(),
                 'loss': loss,
                 'voc': voc.__dict__
-            }, os.path.join(directory, '{}_{}.tar'.format(epoch, 'checkpoint')))
+            }, os.path.join(directory, '{}_{}.tar'.format('checkpoint', epoch)))
 
 
 if __name__ == '__main__':
