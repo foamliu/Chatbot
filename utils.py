@@ -1,6 +1,8 @@
+import datetime
 import os
 import random
 import re
+import time
 import unicodedata
 
 import jieba
@@ -117,3 +119,7 @@ def pick_n_valid_sentences(n):
     samples = samples[num_training_samples:]
     samples = random.sample(samples, n)
     return [' '.join([voc.index2word[token] for token in sample['input'] if token != EOS_token]) for sample in samples]
+
+
+def timestamp():
+    return datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
