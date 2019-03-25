@@ -4,8 +4,10 @@
 
 
 ## 依赖
-- Python 3.5
-- PyTorch 0.4
++- Python 3.7
++- PyTorch 1.0
++- [jieba 0.39](https://github.com/fxsjy/jieba)
++- [tqdm 4.31.1](https://github.com/tqdm/tqdm)
 
 ## 数据集
 
