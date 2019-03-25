@@ -12,6 +12,7 @@
 ## 数据集
 
 [小黄鸡聊天语料](https://github.com/candlewill/Dialog_Corpus)
+[PTT中文語料](https://github.com/zake7749/Gossiping-Chinese-Corpus)
 
 ## 用法
 
