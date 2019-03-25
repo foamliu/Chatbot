@@ -1,10 +1,12 @@
 import json
-
+import os
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 corpus_loc = 'data/xiaohuangji50w_nofenci.conv'
+wordmap_loc = 'data/WORDMAP.json'
+samples_loc = 'data/samples.json'
 
 # Configure training/optimization
 clip = 50.0
@@ -52,4 +54,5 @@ class Voc:
         self.num_words = len(word_map)
 
 
-voc = Voc('data/WORDMAP.json')
+if os.path.isfile(wordmap_loc):
+    voc = Voc(wordmap_loc)

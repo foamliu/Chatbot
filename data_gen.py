@@ -64,8 +64,7 @@ class ChatbotDataset(Dataset):
         assert self.split in {'train', 'valid'}
 
         print('loading {} samples'.format(split))
-        samples_path = 'data/samples.json'
-        self.samples = json.load(open(samples_path, 'r'))
+        self.samples = json.load(open(samples_loc, 'r'))
 
         if split == 'train':
             self.samples = self.samples[:num_training_samples]
@@ -90,8 +89,7 @@ class ChatbotDataset(Dataset):
 
 if __name__ == '__main__':
     print('loading {} samples'.format('valid'))
-    samples_path = 'data/samples.json'
-    samples = json.load(open(samples_path, 'r'))
+    samples = json.load(open(samples_loc, 'r'))
     pair_batch = []
     for i in range(5):
         sample = samples[i]

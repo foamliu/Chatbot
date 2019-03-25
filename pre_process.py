@@ -33,12 +33,12 @@ def build_wordmap():
     print(len(word_map))
     print(words[:10])
 
-    with open('data/WORDMAP.json', 'w', encoding="utf8") as file:
+    with open(wordmap_loc, 'w', encoding="utf8") as file:
         json.dump(word_map, file, indent=4)
 
 
 def build_samples():
-    word_map = json.load(open('data/WORDMAP.json', 'r', encoding="utf8"))
+    word_map = json.load(open(wordmap_loc, 'r', encoding="utf8"))
 
     with open(corpus_loc, 'r', encoding="utf8") as f:
         sentences = f.readlines()
@@ -60,10 +60,9 @@ def build_samples():
         if len(tokens_in) <= max_len and len(tokens_out) <= max_len and UNK_token not in (tokens_in + tokens_out):
             samples.append({'input': list(tokens_in), 'output': list(tokens_out)})
 
-    filename = 'data/samples.json'
-    with open(filename, 'w', encoding="utf8") as f:
+    with open(samples_loc, 'w', encoding="utf8") as f:
         json.dump(samples, f, indent=4)
-    print('{} samples created at: {}.'.format(len(samples), filename))
+    print('{} samples created at: {}.'.format(len(samples), samples_loc))
 
 
 if __name__ == '__main__':
