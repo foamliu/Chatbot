@@ -6,6 +6,8 @@ import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+corpus_url = 'https://github.com/candlewill/Dialog_Corpus/raw/master/xiaohuangji50w_nofenci.conv.zip'
+
 corpus_loc = 'data/xiaohuangji50w_nofenci.conv'
 wordmap_loc = 'data/WORDMAP.json'
 samples_loc = 'data/samples.json'

@@ -11,7 +11,7 @@
 
 ## 数据集
 
-小黄鸡聊天语料
+[小黄鸡聊天语料](https://github.com/candlewill/Dialog_Corpus)
 
 ## 用法
 
