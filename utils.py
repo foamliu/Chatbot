@@ -1,13 +1,12 @@
+# encoding=utf-8
 import datetime
 import os
 import random
 import re
 import time
 import unicodedata
-
 import jieba
 from torch import nn
-
 from config import *
 
 

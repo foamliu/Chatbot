@@ -1,10 +1,7 @@
 # encoding=utf-8
-
 import itertools
-
 import jieba
 from torch.utils.data import Dataset
-
 from config import *
 
 

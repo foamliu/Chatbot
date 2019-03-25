@@ -1,8 +1,7 @@
+# encoding=utf-8
 from collections import Counter
-
 import jieba
 from tqdm import tqdm
-
 from config import *
 
 
