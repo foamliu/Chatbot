@@ -1,13 +1,12 @@
+# encoding=utf-8
 import datetime
 import os
 import random
 import re
 import time
 import unicodedata
-
 import jieba
 from torch import nn
-
 from config import *
 
 
@@ -114,8 +113,7 @@ def indexesFromSentence(voc, sentence):
 
 
 def pick_n_valid_sentences(n):
-    samples_path = 'data/samples.json'
-    samples = json.load(open(samples_path, 'r'))
+    samples = json.load(open(samples_loc, 'r'))
     samples = samples[num_training_samples:]
     samples = random.sample(samples, n)
     return [' '.join([voc.index2word[token] for token in sample['input'] if token != EOS_token]) for sample in samples]

@@ -1,10 +1,18 @@
+# encoding=utf-8
 import json
-
+import os
 import torch
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-corpus_loc = 'data/xiaohuangji50w_nofenci.conv'
+xhj_corpus_url = 'https://github.com/candlewill/Dialog_Corpus/raw/master/xiaohuangji50w_nofenci.conv.zip'
+ptt_corpus_url = 'https://github.com/zake7749/Gossiping-Chinese-Corpus/raw/master/data/Gossiping-QA-Dataset.txt'
+
+xhj_corpus_loc = 'data/xiaohuangji50w_nofenci.conv'
+ptt_corpus_loc = 'data/Gossiping-QA-Dataset.txt'
+wordmap_loc = 'data/WORDMAP.json'
+samples_loc = 'data/samples.json'
 
 # Configure training/optimization
 clip = 50.0
@@ -52,4 +60,5 @@ class Voc:
         self.num_words = len(word_map)
 
 
-voc = Voc('data/WORDMAP.json')
+if os.path.isfile(wordmap_loc):
+    voc = Voc(wordmap_loc)

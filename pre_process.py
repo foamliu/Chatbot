@@ -1,8 +1,7 @@
+# encoding=utf-8
 from collections import Counter
-
 import jieba
 from tqdm import tqdm
-
 from config import *
 
 
@@ -10,12 +9,7 @@ def encode_text(word_map, c):
     return [word_map.get(word, word_map['<unk>']) for word in c] + [word_map['<end>']]
 
 
-def build_wordmap():
-    with open(corpus_loc, 'r') as f:
-        sentences = f.readlines()
-
-    sentences = [s[2:] for s in sentences if len(s[1:].strip()) > 0]
-
+def build_wordmap(sentences):
     word_freq = Counter()
 
     for sentence in tqdm(sentences):
@@ -33,21 +27,10 @@ def build_wordmap():
     print(len(word_map))
     print(words[:10])
 
-    with open('data/WORDMAP.json', 'w') as file:
-        json.dump(word_map, file, indent=4)
+    return word_map
 
 
-def build_samples():
-    word_map = json.load(open('data/WORDMAP.json', 'r'))
-
-    with open(corpus_loc, 'r') as f:
-        sentences = f.readlines()
-    print('total lines: ' + str(len(sentences)))
-
-    sentences = [s[2:].strip() for s in sentences if len(s[1:].strip()) > 0]
-    print(len(sentences))
-    print('removed empty lines: ' + str(len(sentences)))
-
+def build_samples(sentences, word_map):
     print('building samples')
     samples = []
     for i in tqdm(range(0, len(sentences) - 1, 2)):
@@ -60,12 +43,49 @@ def build_samples():
         if len(tokens_in) <= max_len and len(tokens_out) <= max_len and UNK_token not in (tokens_in + tokens_out):
             samples.append({'input': list(tokens_in), 'output': list(tokens_out)})
 
-    filename = 'data/samples.json'
-    with open(filename, 'w') as f:
-        json.dump(samples, f, indent=4)
-    print('{} samples created at: {}.'.format(len(samples), filename))
+    return samples
+
+
+def build_sentences_xhj():
+    with open(xhj_corpus_loc, 'r', encoding="utf8") as f:
+        sentences = f.readlines()
+    print('total lines: ' + str(len(sentences)))
+
+    sentences = [s[2:].strip() for s in sentences if len(s[1:].strip()) > 0]
+    print(len(sentences))
+    print('removed empty lines: ' + str(len(sentences)))
+
+    return sentences
+
+
+def build_sentences_ptt():
+    with open(ptt_corpus_loc, 'r', encoding="utf8") as f:
+        sentences = f.readlines()
+    print('total lines: ' + str(len(sentences)))
+
+    result = []
+    for s in sentences:
+        if len(s.strip()) > 0:
+            for i in s.split('\t'):
+                result.append(i.strip())
+    print(len(result))
+    print('removed empty lines: ' + str(len(result)))
+
+    return result
+
+
+def save_data(data, filename):
+    with open(filename, 'w', encoding="utf8") as f:
+        json.dump(data, f, indent=4)
+    print('{} data created at: {}.'.format(len(data), filename))
 
 
 if __name__ == '__main__':
-    build_wordmap()
-    build_samples()
+    # for xiaohuangji
+    # sentences = build_sentences_xhj()
+    # for ptt
+    sentences = build_sentences_ptt()
+    word_map = build_wordmap(sentences)
+    save_data(word_map, wordmap_loc)
+    samples = build_samples(sentences, word_map)
+    save_data(samples, samples_loc)

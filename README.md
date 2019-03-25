@@ -4,12 +4,15 @@
 
 
 ## 依赖
-- Python 3.5
-- PyTorch 0.4
++- Python 3.7
++- PyTorch 1.0
++- [jieba 0.39](https://github.com/fxsjy/jieba)
++- [tqdm 4.31.1](https://github.com/tqdm/tqdm)
 
 ## 数据集
 
-小黄鸡聊天语料
+[小黄鸡聊天语料](https://github.com/candlewill/Dialog_Corpus)
+[PTT中文語料](https://github.com/zake7749/Gossiping-Chinese-Corpus)
 
 ## 用法
 

@@ -1,5 +1,5 @@
+# encoding=utf-8
 from torch import optim
-
 from data_gen import ChatbotDataset
 from models import EncoderRNN, LuongAttnDecoderRNN
 from utils import *
