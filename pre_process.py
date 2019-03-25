@@ -11,7 +11,7 @@ def encode_text(word_map, c):
 
 
 def build_wordmap():
-    with open(corpus_loc, 'r') as f:
+    with open(corpus_loc, 'r', encoding="utf8") as f:
         sentences = f.readlines()
 
     sentences = [s[2:] for s in sentences if len(s[1:].strip()) > 0]
@@ -33,14 +33,14 @@ def build_wordmap():
     print(len(word_map))
     print(words[:10])
 
-    with open('data/WORDMAP.json', 'w') as file:
+    with open('data/WORDMAP.json', 'w', encoding="utf8") as file:
         json.dump(word_map, file, indent=4)
 
 
 def build_samples():
-    word_map = json.load(open('data/WORDMAP.json', 'r'))
+    word_map = json.load(open('data/WORDMAP.json', 'r', encoding="utf8"))
 
-    with open(corpus_loc, 'r') as f:
+    with open(corpus_loc, 'r', encoding="utf8") as f:
         sentences = f.readlines()
     print('total lines: ' + str(len(sentences)))
 
@@ -61,7 +61,7 @@ def build_samples():
             samples.append({'input': list(tokens_in), 'output': list(tokens_out)})
 
     filename = 'data/samples.json'
-    with open(filename, 'w') as f:
+    with open(filename, 'w', encoding="utf8") as f:
         json.dump(samples, f, indent=4)
     print('{} samples created at: {}.'.format(len(samples), filename))
 
